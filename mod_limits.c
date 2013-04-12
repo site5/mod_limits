@@ -128,15 +128,15 @@ static int limits_handler(request_rec *r) {
 			// Count the number of connections from this IP address from the scoreboard 
 #ifdef APACHE24
 			ws_record = ap_get_scoreboard_worker_from_indexes(i, j);
-			if (limits->ip > 0) 
+			if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) 
 				if (strcmp(r->connection->client_ip, ws_record->client) == 0)
 #else
             ws_record = ap_get_scoreboard_worker(i, j);
-			if (limits->ip > 0) {
+			if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
 				if (strcmp(r->connection->remote_ip, ws_record->client) == 0)
 #endif // APACHE24
 					ip_count++;
-				if (ip_count > limits->ip) {
+				if (ip_count > limits->ip && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
 					ap_log_error(APLOG_MARK, APLOG_INFO, OK, r->server, 
 #ifdef APACHE24
 						"mod_limits: %s client exceeded connection limit", r->connection->client_ip);
@@ -150,7 +150,7 @@ static int limits_handler(request_rec *r) {
 				}
 			}
 
-			if (limits->vhost > 0) {
+			if (limits->vhost > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
 				if (strncmp(r->server->server_hostname, ws_record->vhost, 31) == 0)
 					vhost_count++;
 				if (vhost_count > limits->vhost) {
@@ -180,7 +180,7 @@ static int limits_handler(request_rec *r) {
 
 	for (i = 0; i < HARD_SERVER_LIMIT; ++i) {
 		score_record = ap_scoreboard_image->servers[i];
-		if (limits->ip > 0) {
+		if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
 			// Count the number of connections from this IP address from the scoreboard
 			if (strcmp(r->connection->remote_ip, score_record.client) == 0)
 				ip_count++;
@@ -193,7 +193,7 @@ static int limits_handler(request_rec *r) {
 				return HTTP_SERVICE_UNAVAILABLE;
 			}
 		}
-		if (limits->vhost > 0) {
+		if (limits->vhost > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
 			if (strcmp(r->server->server_hostname, score_record.vhostrec->server_hostname) == 0)
 				vhost_count++;
 			if (vhost_count > limits->vhost) {
