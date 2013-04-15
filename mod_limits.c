@@ -128,15 +128,15 @@ static int limits_handler(request_rec *r) {
 			// Count the number of connections from this IP address from the scoreboard 
 #ifdef APACHE24
 			ws_record = ap_get_scoreboard_worker_from_indexes(i, j);
-			if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0) && (strncmp(r->the_request, "OPTIONS", 7) != 0) && (strcmp(r->the_request, "NULL") != 0)) 
+			if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) 
 				if (strcmp(r->connection->client_ip, ws_record->client) == 0)
 #else
             ws_record = ap_get_scoreboard_worker(i, j);
-			if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0) && (strncmp(r->the_request, "OPTIONS", 7) != 0) && (strcmp(r->the_request, "NULL") != 0)) {
+			if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
 				if (strcmp(r->connection->remote_ip, ws_record->client) == 0)
 #endif // APACHE24
 					ip_count++;
-				if (ip_count > limits->ip && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0) && (strncmp(r->the_request, "OPTIONS", 7) != 0) && (strcmp(r->the_request, "NULL") != 0)) {
+				if (ip_count > limits->ip && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
 					ap_log_error(APLOG_MARK, APLOG_INFO, OK, r->server, 
 #ifdef APACHE24
 						"mod_limits: %s client exceeded connection limit", r->connection->client_ip);
