@@ -70,9 +70,6 @@ static int limits_handler(request_rec *r) {
 	// We decline to handle subrequests: otherwise, in the next step we could get into an infinite loop. 
 	if (!ap_is_initial_req(r))
 		return DECLINED;
-	// If the request is an internal child check, we'll pass
-	if(strncmp(r->the_request, "OPTIONS", 7) == 0)
-		return DECLINED;
 #ifdef APACHE2
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, OK, r->server, 
 		"mod_limits: current limits IP: %d UID: %d VHost: %d Load: %.2f cAVG: %.2f T: %d",
@@ -131,15 +128,15 @@ static int limits_handler(request_rec *r) {
 			// Count the number of connections from this IP address from the scoreboard 
 #ifdef APACHE24
 			ws_record = ap_get_scoreboard_worker_from_indexes(i, j);
-			if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) 
+			if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0) && (strncmp(r->the_request, "OPTIONS", 7) != 0) && (strcmp(r->the_request, "NULL") != 0)) 
 				if (strcmp(r->connection->client_ip, ws_record->client) == 0)
 #else
             ws_record = ap_get_scoreboard_worker(i, j);
-			if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
+			if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0) && (strncmp(r->the_request, "OPTIONS", 7) != 0) && (strcmp(r->the_request, "NULL") != 0)) {
 				if (strcmp(r->connection->remote_ip, ws_record->client) == 0)
 #endif // APACHE24
 					ip_count++;
-				if (ip_count > limits->ip && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
+				if (ip_count > limits->ip && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0) && (strncmp(r->the_request, "OPTIONS", 7) != 0) && (strcmp(r->the_request, "NULL") != 0)) {
 					ap_log_error(APLOG_MARK, APLOG_INFO, OK, r->server, 
 #ifdef APACHE24
 						"mod_limits: %s client exceeded connection limit", r->connection->client_ip);
@@ -153,7 +150,7 @@ static int limits_handler(request_rec *r) {
 				}
 			}
 
-			if (limits->vhost > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
+			if (limits->vhost > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0) && (strncmp(r->the_request, "OPTIONS", 7) != 0) && (strcmp(r->the_request, "NULL") != 0)) {
 				if (strncmp(r->server->server_hostname, ws_record->vhost, 31) == 0)
 					vhost_count++;
 				if (vhost_count > limits->vhost) {
@@ -183,7 +180,7 @@ static int limits_handler(request_rec *r) {
 
 	for (i = 0; i < HARD_SERVER_LIMIT; ++i) {
 		score_record = ap_scoreboard_image->servers[i];
-		if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
+		if (limits->ip > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0) && (strncmp(r->the_request, "OPTIONS", 7) != 0) && (strcmp(r->the_request, "NULL") != 0)) {
 			// Count the number of connections from this IP address from the scoreboard
 			if (strcmp(r->connection->remote_ip, score_record.client) == 0)
 				ip_count++;
@@ -196,7 +193,7 @@ static int limits_handler(request_rec *r) {
 				return HTTP_SERVICE_UNAVAILABLE;
 			}
 		}
-		if (limits->vhost > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
+		if (limits->vhost > 0 && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0) && (strncmp(r->the_request, "OPTIONS", 7) != 0) && (strcmp(r->the_request, "NULL") != 0)) {
 			if (strcmp(r->server->server_hostname, score_record.vhostrec->server_hostname) == 0)
 				vhost_count++;
 			if (vhost_count > limits->vhost) {
