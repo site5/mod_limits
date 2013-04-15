@@ -70,6 +70,9 @@ static int limits_handler(request_rec *r) {
 	// We decline to handle subrequests: otherwise, in the next step we could get into an infinite loop. 
 	if (!ap_is_initial_req(r))
 		return DECLINED;
+	// If the request is an internal child check, we'll pass
+	if(strcmp(r->the_request, "OPTIONS *") == 0)
+		return DECLINED;
 #ifdef APACHE2
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, OK, r->server, 
 		"mod_limits: current limits IP: %d UID: %d VHost: %d Load: %.2f cAVG: %.2f T: %d",
