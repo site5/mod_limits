@@ -71,7 +71,7 @@ static int limits_handler(request_rec *r) {
 	if (!ap_is_initial_req(r))
 		return DECLINED;
 	// If the request is an internal child check, we'll pass
-	if(strcmp(r->the_request, "OPTIONS *") == 0)
+	if(strncmp(r->the_request, "OPTIONS", 7) == 0)
 		return DECLINED;
 #ifdef APACHE2
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, OK, r->server, 
