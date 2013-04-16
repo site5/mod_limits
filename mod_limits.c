@@ -137,7 +137,7 @@ static int limits_handler(request_rec *r) {
 #endif // APACHE24
 					ip_count++;
 				if (ip_count > limits->ip && (strcmp(r->connection->remote_ip, "127.0.0.1") != 0)) {
-					ap_log_error(APLOG_MARK, APLOG_INFO, OK, r->server, 
+					ap_log_error(APLOG_MARK, APLOG_WARNING, OK, r->server, 
 #ifdef APACHE24
 						"mod_limits: %s client exceeded connection limit", r->connection->client_ip);
 #else
@@ -154,11 +154,11 @@ static int limits_handler(request_rec *r) {
 				if (strncmp(r->server->server_hostname, ws_record->vhost, 31) == 0)
 					vhost_count++;
 				if (vhost_count > limits->vhost) {
-					ap_log_error(APLOG_MARK, APLOG_INFO, OK, r->server,
+					ap_log_error(APLOG_MARK, APLOG_WARNING, OK, r->server,
 #ifdef APACHE24
-						"mod_limits: %s client exceeded vhost connection limit", r->connection->client_ip);
+						"mod_limits: %s exceeded vhost connection limit", r->server->server_hostname);
 #else
-						"mod_limits: %s client exceeded vhost connection limit", r->connection->remote_ip);
+						"mod_limits: %s exceeded vhost connection limit", r->server->server_hostname);
 #endif // APACHE24
 					// set an environment variable
 					apr_table_setn(r->subprocess_env, "LIMITED", "1");
@@ -185,7 +185,7 @@ static int limits_handler(request_rec *r) {
 			if (strcmp(r->connection->remote_ip, score_record.client) == 0)
 				ip_count++;
 			if (ip_count > limits->ip) {
-				ap_log_error(APLOG_MARK, APLOG_INFO, r->server,
+				ap_log_error(APLOG_MARK, APLOG_WARNING, r->server,
 					"mod_limits: %s client exceeded connection limit", r->connection->remote_ip);
 				// set an environment variable
 				ap_table_setn(r->subprocess_env, "LIMITED", "1");
@@ -197,8 +197,8 @@ static int limits_handler(request_rec *r) {
 			if (strcmp(r->server->server_hostname, score_record.vhostrec->server_hostname) == 0)
 				vhost_count++;
 			if (vhost_count > limits->vhost) {
-				ap_log_error(APLOG_MARK, APLOG_INFO, r->server,
-					"mod_limits: %s client exceeded vhost connection limit", r->connection->remote_ip);
+				ap_log_error(APLOG_MARK, APLOG_WARNING, r->server,
+					"mod_limits: %s exceeded vhost connection limit", r->server->server_hostname);
 				// set an environment variable
 				ap_table_setn(r->subprocess_env, "LIMITED", "1");
 				// return 503
@@ -300,7 +300,7 @@ static command_rec limits_cmds[] = {
 #ifdef APACHE2
 // Emit an informational-level log message on startup and init the thread_limit and server_limit  
 static int limits_init(apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s) {
-    ap_log_error(APLOG_MARK, APLOG_INFO, OK, s, "%s/%s loaded", MODULE_NAME, MODULE_VERSION);
+    ap_log_error(APLOG_MARK, APLOG_WARNING, OK, s, "%s/%s loaded", MODULE_NAME, MODULE_VERSION);
     ap_mpm_query(AP_MPMQ_HARD_LIMIT_THREADS, &thread_limit);
     ap_mpm_query(AP_MPMQ_HARD_LIMIT_DAEMONS, &server_limit);
     return OK;	
